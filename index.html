@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Gráfico de Velas Candlestick</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/luxon@3.4.3/build/global/luxon.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-luxon@1.3.1/dist/chartjs-adapter-luxon.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-chart-financial@0.1.1/dist/chartjs-chart-financial.min.js"></script>
+</head>
+<body>
+  <h2>📈 Gráfico Candlestick <span id="moneda-label">BTC/USDT</span></h2>
+  <div>
+    <strong>Precio actual: <span id="precio-actual">-</span></strong>
+  </div>
+  <div style="margin-top: 10px;">
+    <label>Moneda:
+      <select id="selector-moneda">
+        <option value="BTCUSDT" selected>BTC/USDT</option>
+        <option value="ETHUSDT">ETH/USDT</option>
+        <option value="BNBUSDT">BNB/USDT</option>
+      </select>
+    </label>
+    <label style="margin-left: 20px;">Velas:
+      <select id="selector-velas">
+        <option value="1m" selected>1 minuto</option>
+        <option value="5m">5 minutos</option>
+        <option value="30m">30 minutos</option>
+        <option value="1h">1 hora</option>
+        <option value="1d">1 día</option>
+        
+      </select>
+    </label>
+    
+     <!-- ✅ Botón agregado debajo de los selectores -->
+    <button id="toggleBollinger" style="margin-left: 20px;">
+      Mostrar/Ocultar Bandas de Bollinger
+    </button>
+    
+    <button id="toggleEMA" style="margin-left: 20px;">
+  Mostrar/Ocultar EMAs
+  </button>
+  </div>
+  
+  <canvas id="grafico" width="800" height="400"></canvas>
+  <h3>RSI (Relative Strength Index)</h3>
+<canvas id="graficoRSI" width="800" height="150"></canvas>
+<h3>MACD (Moving Average Convergence Divergence)</h3>
+<canvas id="graficoMACD" width="800" height="150"></canvas>
+  <h3>ADX (Average Directional Index)</h3>
+<canvas id="graficoADX" width="800" height="100"></canvas>
+
+  <script src="script.js"></script>
+</body>
+</html>
+
+
