@@ -353,14 +353,6 @@ document.addEventListener("DOMContentLoaded", () => {
       adx: adxValues,
     });
   }
-  // 🚨 Verificar condiciones para activar alarmas
-  //if (
-  //adxValues[adxValues.length - 1] > 25 &&
-  //histogram[histogram.length - 1] > 0
-  //) {
-  //console.log("ALERTA: Tendencia fuerte detectada + MACD positivo");
-  // Aquí podrías hacer sonar una alarma, mostrar un modal, etc.
-  //}//
 
   // boton banda de boillinger
   toggleBollingerBtn.addEventListener("click", () => {
