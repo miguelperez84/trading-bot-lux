@@ -257,6 +257,10 @@ document.addEventListener("DOMContentLoaded", () => {
     if (datos.length === 0) return;
     const cierres = datos.map((d) => d.c);
 
+    // Calcula EMAs dentro del flujo correcto
+    const ema9 = calcularEMA(cierres, 9);
+    const ema21 = calcularEMA(cierres, 21);
+
     // RSI
     const rsi = calcularRSI(cierres);
     if (!rsiChart) {
@@ -351,6 +355,10 @@ document.addEventListener("DOMContentLoaded", () => {
       rsi,
       macd: { macdLine, signalLine },
       adx: adxValues,
+      ema: {
+        ema9,
+        ema21,
+      },
     });
   }
 
@@ -406,7 +414,10 @@ document.addEventListener("DOMContentLoaded", () => {
     // 🔜 Aquí puedes agregar notificación visual, sonora o envío a Telegram
   }
 
-  function verificarCondiciones({ rsi, macd, adx }) {
+  // const ema9 = calcularEMA(cierres, 9);
+  // const ema21 = calcularEMA(cierres, 21);
+
+  function verificarCondiciones({ rsi, macd, adx, ema }) {
     const ultimaRSI = rsi.at(-1);
     const ultimaMACD = macd.macdLine.at(-1);
     const ultimaSignal = macd.signalLine.at(-1);
@@ -414,16 +425,31 @@ document.addEventListener("DOMContentLoaded", () => {
     const penultimaSignal = macd.signalLine.at(-2);
     const ultimaADX = adx.at(-1);
 
-    if (ultimaRSI < 30) {
-      registrarEvento("⚠️ RSI < 30: posible sobreventa");
-    }
+    // RSI
+    if (ultimaRSI < 30) registrarEvento("⚠️ RSI < 30: posible sobreventa");
+    if (ultimaRSI > 70) registrarEvento("⚠️ RSI > 70: posible sobrecompra");
 
+    // MACD
     if (ultimaMACD > ultimaSignal && penultimaMACD < penultimaSignal) {
       registrarEvento("📈 Cruce alcista en MACD");
     }
-
-    if (ultimaADX > 25) {
-      registrarEvento("🔥 ADX > 25: tendencia fuerte");
+    if (ultimaMACD < ultimaSignal && penultimaMACD > penultimaSignal) {
+      registrarEvento("📉 Cruce bajista en MACD");
     }
+
+    // ADX
+    if (ultimaADX > 25) registrarEvento("🔥 ADX > 25: tendencia fuerte");
+    else registrarEvento("💤 ADX < 25: tendencia débil");
+
+    // EMA
+    if (ema.ema9.at(-1) > ema.ema21.at(-1)) {
+      registrarEvento("📊 EMA9 > EMA21: posible tendencia alcista");
+    } else {
+      registrarEvento("📉 EMA9 < EMA21: posible tendencia bajista");
+    }
+
+    // 🔜 Aquí irán combinaciones personalizadas como:
+    // - Tendencia fuerte + cruce alcista = Confirmación entrada
+    // - Tendencia fuerte + RSI sobrecompra = Posible agotamiento
   }
 });
