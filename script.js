@@ -414,9 +414,6 @@ document.addEventListener("DOMContentLoaded", () => {
     // 🔜 Aquí puedes agregar notificación visual, sonora o envío a Telegram
   }
 
-  // const ema9 = calcularEMA(cierres, 9);
-  // const ema21 = calcularEMA(cierres, 21);
-
   function verificarCondiciones({ rsi, macd, adx, ema }) {
     const ultimaRSI = rsi.at(-1);
     const ultimaMACD = macd.macdLine.at(-1);
@@ -426,14 +423,15 @@ document.addEventListener("DOMContentLoaded", () => {
     const ultimaADX = adx.at(-1);
 
     // RSI
-    if (ultimaRSI < 30) registrarEvento("⚠️ RSI < 30: posible sobreventa");
-    if (ultimaRSI > 70) registrarEvento("⚠️ RSI > 70: posible sobrecompra");
+    if (ultimaRSI < 40)
+      registrarEvento("🔻 RSI < 40: zona de debilidad o acumulación");
+    if (ultimaRSI > 60) registrarEvento("🔺 RSI > 60: zona de presión alcista");
 
     // MACD
-    if (ultimaMACD > ultimaSignal && penultimaMACD < penultimaSignal) {
+    if (ultimaMACD > ultimaSignal) {
       registrarEvento("📈 Cruce alcista en MACD");
     }
-    if (ultimaMACD < ultimaSignal && penultimaMACD > penultimaSignal) {
+    if (ultimaMACD < ultimaSignal) {
       registrarEvento("📉 Cruce bajista en MACD");
     }
 
@@ -446,6 +444,25 @@ document.addEventListener("DOMContentLoaded", () => {
       registrarEvento("📊 EMA9 > EMA21: posible tendencia alcista");
     } else {
       registrarEvento("📉 EMA9 < EMA21: posible tendencia bajista");
+    }
+    // Si hay cruce de EMA hacia arriba + MACD + ADX > 25
+    if (
+      ultimaMACD > ultimaSignal &&
+      penultimaMACD < penultimaSignal &&
+      ema.ema9.at(-1) > ema.ema21.at(-1) &&
+      ultimaADX > 25
+    ) {
+      registrarEvento("✅ COMPRA validada: EMA + RSI + ADX");
+    }
+
+    // Si hay cruce de EMA hacia abajo + MACD  + ADX > 25
+    if (
+      ultimaMACD < ultimaSignal &&
+      penultimaMACD > penultimaSignal &&
+      ema.ema9.at(-1) < ema.ema21.at(-1) &&
+      ultimaADX > 25
+    ) {
+      registrarEvento("🚨 VENTA validada: EMA + RSI + ADX");
     }
 
     // 🔜 Aquí irán combinaciones personalizadas como:
