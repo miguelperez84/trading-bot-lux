@@ -58,7 +58,7 @@ document.addEventListener("DOMContentLoaded", () => {
     return { macdLine, signalLine, histograma };
   }
   // CALCULO ADX
-  function calcularADX(highs, lows, closes, period = 14) {
+  function calcularADX(highs, lows, closes, period = 8) {
     let plusDM = [],
       minusDM = [],
       tr = [],
@@ -407,11 +407,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
   iniciarActualizacion();
 
-  // === SISTEMA DE ALERTAS CENTRALIZADO ===
+  // === SISTEMA DE ALERTAS CENTRALIZADO (REESTRUCTURADO PARA SCALPING) ===
 
   function registrarEvento(mensaje) {
     console.log("🔔 ALERTA:", mensaje);
-    // 🔜 Aquí puedes agregar notificación visual, sonora o envío a Telegram
+    // 🔜 Puedes agregar notificación visual, sonora o envío a Telegram aquí
   }
 
   function verificarCondiciones({ rsi, macd, adx, ema }) {
@@ -421,52 +421,87 @@ document.addEventListener("DOMContentLoaded", () => {
     const penultimaMACD = macd.macdLine.at(-2);
     const penultimaSignal = macd.signalLine.at(-2);
     const ultimaADX = adx.at(-1);
+    const ema9 = ema.ema9.at(-1);
+    const ema21 = ema.ema21.at(-1);
 
-    // RSI
+    // === ALERTAS INDIVIDUALES ===
     if (ultimaRSI < 40)
       registrarEvento("🔻 RSI < 40: zona de debilidad o acumulación");
     if (ultimaRSI > 60) registrarEvento("🔺 RSI > 60: zona de presión alcista");
 
-    // MACD
-    if (ultimaMACD > ultimaSignal) {
+    if (ultimaMACD > ultimaSignal && penultimaMACD < penultimaSignal)
       registrarEvento("📈 Cruce alcista en MACD");
-    }
-    if (ultimaMACD < ultimaSignal) {
+    if (ultimaMACD < ultimaSignal && penultimaMACD > penultimaSignal)
       registrarEvento("📉 Cruce bajista en MACD");
-    }
 
-    // ADX
     if (ultimaADX > 25) registrarEvento("🔥 ADX > 25: tendencia fuerte");
     else registrarEvento("💤 ADX < 25: tendencia débil");
 
-    // EMA
-    if (ema.ema9.at(-1) > ema.ema21.at(-1)) {
+    if (ema9 > ema21)
       registrarEvento("📊 EMA9 > EMA21: posible tendencia alcista");
-    } else {
-      registrarEvento("📉 EMA9 < EMA21: posible tendencia bajista");
+    else registrarEvento("📉 EMA9 < EMA21: posible tendencia bajista");
+
+    // === COMBINACIONES ESTRATÉGICAS DE SCALPING ===
+
+    // 🟢 ENTRADA FUERTE
+    if (ultimaRSI > 60 && ema9 > ema21 && ultimaADX > 25) {
+      registrarEvento("✅ Entrada Fuerte: RSI > 60, EMA9 > EMA21, ADX > 25");
     }
-    // Si hay cruce de EMA hacia arriba + MACD + ADX > 25
+
+    // 🟢 ENTRADA MODERADA
     if (
       ultimaMACD > ultimaSignal &&
       penultimaMACD < penultimaSignal &&
-      ema.ema9.at(-1) > ema.ema21.at(-1) &&
-      ultimaADX > 25
+      ema9 > ema21 &&
+      ultimaRSI > 60
     ) {
-      registrarEvento("✅ COMPRA validada: EMA + RSI + ADX");
+      registrarEvento(
+        "🟢 Entrada Moderada: MACD cruza al alza, EMA9 > EMA21, RSI > 60"
+      );
     }
 
-    // Si hay cruce de EMA hacia abajo + MACD  + ADX > 25
+    // 🔴 SALIDA o SHORT
     if (
       ultimaMACD < ultimaSignal &&
       penultimaMACD > penultimaSignal &&
-      ema.ema9.at(-1) < ema.ema21.at(-1) &&
-      ultimaADX > 25
+      ema9 < ema21 &&
+      ultimaRSI < 40
     ) {
-      registrarEvento("🚨 VENTA validada: EMA + RSI + ADX");
+      registrarEvento(
+        "🔴 Salida o Short: MACD bajista, EMA9 < EMA21, RSI < 40"
+      );
     }
 
-    // 🔜 Aquí irán combinaciones personalizadas como:
-    // - Tendencia fuerte + cruce alcista = Confirmación entrada
-    // - Tendencia fuerte + RSI sobrecompra = Posible agotamiento
+    // ⚠️ SOBREVENTA + CRUCE ALCISTA
+    if (ultimaRSI < 30 && ultimaMACD > ultimaSignal && ema9 > ema21) {
+      registrarEvento(
+        "⚠️ Reversión Alcista: RSI < 30, MACD alcista, EMA9 > EMA21"
+      );
+    }
+
+    // ⚠️ SOBRECOMPRA + MACD BAJISTA
+    if (ultimaRSI > 70 && ultimaMACD < ultimaSignal) {
+      registrarEvento("⚠️ Sobrecompra: RSI > 70, posible agotamiento");
+    }
+
+    // ⚪️ RANGO
+    if (
+      ultimaRSI >= 45 &&
+      ultimaRSI <= 55 &&
+      Math.abs(ema9 - ema21) < 0.1 &&
+      Math.abs(ultimaMACD - ultimaSignal) < 0.1
+    ) {
+      registrarEvento("⚪️ Zona de Rango: RSI y EMAs laterales, MACD plano");
+    }
+
+    // 🟡 FALSA SEÑAL
+    if (ultimaRSI > 60 && ema9 > ema21 && ultimaADX < 20) {
+      registrarEvento("🟡 Posible Falsa Señal: Sin fuerza real (ADX < 20)");
+    }
   }
+
+  // 🔁 Asegúrate que esta función se llame luego de calcular los indicadores con los datos recientes.
+  // Ejemplo:
+  // const condiciones = { rsi, macd, adx, ema };
+  // verificarCondiciones(condiciones);
 });
